@@ -1,9 +1,11 @@
 package datastructures.lists;
 
+import datastructures.EmptyContainerException;
 import misc.exceptions.NotYetImplementedException;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * Note: For more info on the expected behavior of your methods:
@@ -34,20 +36,50 @@ public class DoubleLinkedList<T> implements IList<T> {
 
     @Override
     public void add(T item) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        if (this.front == null) {
+            this.front = new Node<T>(item);
+        } else if(this.back == null) {
+            this.front.next = new Node<T>(this.front, item, null);
+        } else {
+            this.back.next = new Node<T>(item);
+            Node<T> temp = this.back;
+            this.back = this.back.next;
+            this.back.prev = temp;
+        }
     }
 
     @Override
     public T remove() {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        if (this.front == null) {
+            throw new EmptyContainerException();
+        } else if (this.back == null) {
+            Node<T> temp = this.front;
+            this.front = null;
+            return temp.data;
+        } else {
+            Node<T> temp = this.back;
+            this.back = this.back.prev;
+            this.back.next = null;
+            return temp.data;
+        }
     }
 
     @Override
     public T get(int index) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        if (index >= 0) {
+            Iterator<T> itr = this.iterator();
+            T data = itr.next();
+            for (int i = 0; i <= index; i++) {
+                if (itr.hasNext()) {
+                   data = itr.next();
+                } else {
+                    throw new IndexOutOfBoundsException();
+                }
+            }
+            return data;
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
     }
 
     @Override
@@ -142,8 +174,10 @@ public class DoubleLinkedList<T> implements IList<T> {
          * returns `false` otherwise.
          */
         public boolean hasNext() {
-            // TODO: your code here
-            throw new NotYetImplementedException();
+            if (this.next == null) {
+                return false;
+            }
+            return true;
         }
 
         /**
@@ -154,8 +188,14 @@ public class DoubleLinkedList<T> implements IList<T> {
          *         there are no more elements to look at.
          */
         public T next() {
-            // TODO: your code here
-            throw new NotYetImplementedException();
+            if (this.hasNext()) {
+                Node<T> temp = this.next;
+                this.next = this.next.next;
+                return temp.data;
+            } else {
+                throw new NoSuchElementException();
+            }
+            //throw new NotYetImplementedException();
         }
     }
 }
