@@ -46,6 +46,7 @@ public class DoubleLinkedList<T> implements IList<T> {
             this.back = this.back.next;
             this.back.prev = temp;
         }
+        this.size++;
     }
 
     @Override
@@ -62,6 +63,7 @@ public class DoubleLinkedList<T> implements IList<T> {
             this.back.next = null;
             return temp.data;
         }
+        this.size--;
     }
 
     @Override
@@ -84,14 +86,44 @@ public class DoubleLinkedList<T> implements IList<T> {
 
     @Override
     public T set(int index, T item) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        // if index is 0
+            // front.data = item
+        // if index is size - 1
+            // back.data = item
+        // else
+            // loop to index
+            // set data@index to item
+        if (index == 0) {
+            
+        }
     }
 
     @Override
     public void insert(int index, T item) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        if (index == 0) {
+            this.front.prev = new Node<T>(item);
+            Node<T> temp = this.front;
+            this.front = this.front.prev;
+            this.front.next = temp;
+        } else if (index == this.size - 1) {
+            this.back.next = new Node<T>(item);
+            Node<T> temp = this.back;
+            this.back = this.back.next;
+            this.back.prev = temp;
+        } else {
+            Node<T> curr = this.front;
+            for (int i = 0; i < index - 1; i++) {
+                curr = curr.next;
+            }
+            Node<T> prevNode = curr;
+            Node<T> nextNode = curr.next;
+            prevNode.next = new Node<T>(item);
+            Node<T> newNode = prevNode.next;
+            newNode.next = nextNode;
+            nextNode.prev = newNode;
+            newNode.prev = prevNode;
+        }
+        this.size++;
     }
 
     @Override
