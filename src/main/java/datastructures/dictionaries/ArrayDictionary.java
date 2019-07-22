@@ -21,10 +21,11 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
     Pair<K, V>[] pairs;
 
     // You may add extra fields or helper methods though!
+    private int size;
 
     public ArrayDictionary() {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        this.pairs = makeArrayOfPairs(10);
+        this.size = 0;
     }
 
     /**
@@ -48,34 +49,91 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
         return (Pair<K, V>[]) (new Pair[arraySize]);
     }
 
+    private void copyAndDoublePairs() {
+        if (this.pairs[this.size - 1].key != null) {
+            Pair<K, V>[] newPairs = makeArrayOfPairs(this.pairs.length*2);
+            for (int i = 0; i < this.pairs.length; i++) {
+                newPairs[i].key = this.pairs[i].key;
+                newPairs[i].value = this.pairs[i].value;
+            }
+            this.pairs = newPairs;
+        }
+    }
+
     @Override
     public V get(K key) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        // iterate over this.pairs
+            // if currPair.key = key return its value
+        // return exception is not found
+        for (int i = 0; i < this.size; i++) {
+            if (this.pairs[i].key == key) {
+                return this.pairs[i].value;
+            }
+        }
+        throw new NoSuchKeyException();
     }
 
     @Override
     public V put(K key, V value) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        copyAndDoublePairs();
+
+        this.size++;
+        if (containsKey(key)) {
+            for (int i = 0; i < this.size; i++) {
+                Pair<K, V> curr = this.pairs[i];
+                if (curr.key == key) {
+                    V oldValue = curr.value;
+                    curr.value = value;
+                    return oldValue;
+                }
+            }
+        }
+
+        for (int i = 0; i < this.size; i++) {
+            Pair<K,V> curr = this.pairs[i];
+            if (curr.key == null) {
+                curr.key = key;
+                curr.value = value;
+                return null;
+            }
+        }
+
+        this.pairs[size].key = key;
+        this.pairs[size].value = value;
+        return null;
     }
 
     @Override
     public V remove(K key) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        if (containsKey(key)) {
+            for (int i = 0; i < this.size; i++) {
+                Pair<K,V> curr = this.pairs[i];
+                if (curr.key == key) {
+                    V oldValue = curr.value;
+                    curr.key = null;
+                    curr.value = null;
+                    this.size--;
+                    return oldValue;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
     public boolean containsKey(K key) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        for (int i = 0; i < this.size; i++) {
+            Pair<K,V> curr = this.pairs[i];
+            if (curr.key == key) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public int size() {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        return this.size;
     }
 
     @Override
