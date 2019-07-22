@@ -56,14 +56,15 @@ public class DoubleLinkedList<T> implements IList<T> {
         } else if (this.back == null) {
             Node<T> temp = this.front;
             this.front = null;
+            this.size--;
             return temp.data;
         } else {
             Node<T> temp = this.back;
             this.back = this.back.prev;
             this.back.next = null;
+            this.size--;
             return temp.data;
         }
-        this.size--;
     }
 
     @Override
@@ -86,20 +87,42 @@ public class DoubleLinkedList<T> implements IList<T> {
 
     @Override
     public T set(int index, T item) {
-        // if index is 0
-            // front.data = item
-        // if index is size - 1
-            // back.data = item
-        // else
-            // loop to index
-            // set data@index to item
+        if (index < 0) {
+            throw new IndexOutOfBoundsException();
+        } else if (index >= this.size) {
+            throw new IndexOutOfBoundsException();
+        }
         if (index == 0) {
-            
+            Node<T> newFront = new Node(item);
+            Node<T> remainder = this.front.next;
+            this.front = newFront;
+            this.front.next = remainder;
+            return this.front.data;
+        } else if (index == this.size - 1) { // index is back of list
+            Node<T> newBack = new Node(item);
+            Node<T> remainder = this.back.prev;
+            this.back = newBack;
+            this.back.prev = remainder;
+            return newBack.data;
+        } else {
+            Node<T> temp = this.front;
+            for (int i = 0; i < index; i++) {
+                temp = temp.next;
+            }
+            Node<T> prevNodes = temp.prev;
+            Node<T> nextNodes = temp.next;
+            temp = new Node(item);
+            temp.prev = prevNodes;
+            temp.next = nextNodes;
+            return temp.data;
         }
     }
 
     @Override
     public void insert(int index, T item) {
+        if (index < 0 || index > this.size() + 1) {
+            throw new IndexOutOfBoundsException();
+        }
         if (index == 0) {
             this.front.prev = new Node<T>(item);
             Node<T> temp = this.front;
@@ -128,31 +151,55 @@ public class DoubleLinkedList<T> implements IList<T> {
 
     @Override
     public T delete(int index) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        if (index < 0 || index >= this.size()) {
+            throw new IndexOutOfBoundsException();
+        }
+        this.size--;
+        Node<T> curr = this.front;
+        for (int i = 0; i < index; i++) {
+            curr = curr.next;
+        }
+        Node<T> prev = curr.prev;
+        Node<T> next = curr.next;
+        curr.next = null;
+        curr.prev = null;
+        prev.next = next;
+        next.prev = prev;
+        return curr.data;
     }
 
     @Override
     public int indexOf(T item) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        Node<T> curr = this.front;
+        for (int i = 0; i < this.size; i++) {
+            if (curr.data == item) {
+                return i;
+            }
+            curr = curr.next;
+        }
+        return -1;
     }
 
     @Override
     public int size() {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        return this.size;
     }
 
     @Override
     public boolean contains(T other) {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        Node<T> curr = this.front;
+        for (int i = 0; i < this.size; i++) {
+            if (curr.data == other) {
+                return true;
+            }
+            curr = curr.next;
+        }
+        return false;
     }
 
     @Override
     public String toString() {
-        return super.toString();
+//        return super.toString();
 
         /*
         After you've implemented the iterator, comment out the line above and uncomment the line
@@ -160,7 +207,7 @@ public class DoubleLinkedList<T> implements IList<T> {
         debugger.
         */
 
-        // return IList.toString(this);
+        return IList.toString(this);
     }
 
     @Override
@@ -227,7 +274,6 @@ public class DoubleLinkedList<T> implements IList<T> {
             } else {
                 throw new NoSuchElementException();
             }
-            //throw new NotYetImplementedException();
         }
     }
 }
