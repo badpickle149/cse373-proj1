@@ -62,9 +62,6 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
 
     @Override
     public V get(K key) {
-        // iterate over this.pairs
-            // if currPair.key = key return its value
-        // return exception is not found
         for (int i = 0; i < this.size; i++) {
             if (this.pairs[i].key == key) {
                 return this.pairs[i].value;
@@ -138,13 +135,16 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
 
     @Override
     public Iterator<KVPair<K, V>> iterator() {
-        // TODO: your code here
-        throw new NotYetImplementedException();
+        KVPair<K,V>[] pairs = new KVPair[this.pairs.length];
+        for (int i = 0; i < pairs.length; i++) {
+            pairs[i] = new KVPair<K,V>(this.pairs[i].key, this.pairs[i].value);
+        }
+        return new ArrayDictionaryIterator<K,V>(pairs);
     }
 
     @Override
     public String toString() {
-        return super.toString();
+        //return super.toString();
 
         /*
         After you've implemented the iterator, comment out the line above and uncomment the line
@@ -152,7 +152,7 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
         debugger.
         */
 
-        // return IDictionary.toString(this);
+        return IDictionary.toString(this);
     }
 
     private static class Pair<K, V> {
@@ -173,22 +173,28 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
 
     private static class ArrayDictionaryIterator<K, V> implements Iterator<KVPair<K, V>> {
         // You'll need to add some fields
+        private int currIndex;
+        private KVPair<K,V>[] pairs;
 
-        public ArrayDictionaryIterator(/* The constructor will need some arguments too */) {
-            // TODO: your code here
-            throw new NotYetImplementedException();
+        public ArrayDictionaryIterator(KVPair<K,V>[] pairs) {
+            this.currIndex = 0;
+            this.pairs = pairs;
         }
 
         @Override
         public boolean hasNext() {
-            // TODO: your code here
-            throw new NotYetImplementedException();
+            if (currIndex < pairs.length) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
         public KVPair<K, V> next() {
-            // TODO: your code here
-            throw new NotYetImplementedException();
+            KVPair<K,V> next = this.pairs[currIndex];
+            this.currIndex++;
+            return next;
         }
     }
 }

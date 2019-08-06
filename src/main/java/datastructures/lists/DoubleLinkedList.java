@@ -39,7 +39,9 @@ public class DoubleLinkedList<T> implements IList<T> {
         if (this.front == null) {
             this.front = new Node<T>(item);
         } else if(this.back == null) {
-            this.front.next = new Node<T>(this.front, item, null);
+            Node<T> temp = new Node<T>(this.front, item, null);
+            this.front.next = temp;
+            this.back = temp;
         } else {
             this.back.next = new Node<T>(item);
             Node<T> temp = this.back;
@@ -62,6 +64,10 @@ public class DoubleLinkedList<T> implements IList<T> {
             Node<T> temp = this.back;
             this.back = this.back.prev;
             this.back.next = null;
+            // get rid of back if there are only two nodes
+            if (this.size == 2) {
+                this.back = null;
+            }
             this.size--;
             return temp.data;
         }
@@ -72,7 +78,7 @@ public class DoubleLinkedList<T> implements IList<T> {
         if (index >= 0) {
             Iterator<T> itr = this.iterator();
             T data = itr.next();
-            for (int i = 0; i <= index; i++) {
+            for (int i = 0; i < index; i++) {
                 if (itr.hasNext()) {
                    data = itr.next();
                 } else {
@@ -85,6 +91,8 @@ public class DoubleLinkedList<T> implements IList<T> {
         }
     }
 
+    // index -> index of DoubleLinkedList to set
+    // item -> new data to replace old DoubleLinkedList data
     @Override
     public T set(int index, T item) {
         if (index < 0) {
@@ -93,58 +101,97 @@ public class DoubleLinkedList<T> implements IList<T> {
             throw new IndexOutOfBoundsException();
         }
         if (index == 0) {
-            Node<T> newFront = new Node(item);
+            T oldData = this.front.data;
+            Node<T> newFront = new Node<T>(item);
             Node<T> remainder = this.front.next;
+            if (remainder != null) {
+                remainder.prev = newFront;
+            }
             this.front = newFront;
             this.front.next = remainder;
-            return this.front.data;
+            return oldData;
         } else if (index == this.size - 1) { // index is back of list
-            Node<T> newBack = new Node(item);
+            T oldData = this.back.data;
+            Node<T> newBack = new Node<T>(item);
             Node<T> remainder = this.back.prev;
+            remainder.next = newBack;
             this.back = newBack;
             this.back.prev = remainder;
-            return newBack.data;
+            return oldData;
         } else {
+            // iterate to index
             Node<T> temp = this.front;
             for (int i = 0; i < index; i++) {
                 temp = temp.next;
             }
-            Node<T> prevNodes = temp.prev;
-            Node<T> nextNodes = temp.next;
-            temp = new Node(item);
-            temp.prev = prevNodes;
-            temp.next = nextNodes;
-            return temp.data;
+            T oldData = temp.data;
+            Node<T> newNode = new Node<T>(item);
+            temp.prev.next = newNode;
+            temp.next.prev = newNode;
+            newNode.prev = temp.prev;
+            newNode.next = temp.next;
+            temp.prev = null;
+            temp.next = null;
+            return oldData;
         }
     }
 
     @Override
     public void insert(int index, T item) {
-        if (index < 0 || index > this.size() + 1) {
+        if (index < 0 || index > this.size) {
             throw new IndexOutOfBoundsException();
         }
         if (index == 0) {
-            this.front.prev = new Node<T>(item);
-            Node<T> temp = this.front;
-            this.front = this.front.prev;
-            this.front.next = temp;
-        } else if (index == this.size - 1) {
-            this.back.next = new Node<T>(item);
-            Node<T> temp = this.back;
-            this.back = this.back.next;
-            this.back.prev = temp;
-        } else {
-            Node<T> curr = this.front;
-            for (int i = 0; i < index - 1; i++) {
-                curr = curr.next;
+            if (this.front == null) {
+                this.front = new Node<T>(item);
+            } else {
+                this.front.prev = new Node<T>(item);
+                Node<T> temp = this.front;
+                this.front = this.front.prev;
+                this.front.next = temp;
             }
-            Node<T> prevNode = curr;
-            Node<T> nextNode = curr.next;
-            prevNode.next = new Node<T>(item);
-            Node<T> newNode = prevNode.next;
-            newNode.next = nextNode;
-            nextNode.prev = newNode;
-            newNode.prev = prevNode;
+        } else if (index == this.size) {
+            if (this.back == null) {
+                this.back = new Node<T>(item);
+                // iterate to one before back
+                Node<T> temp = this.front;
+                while (temp.next != null) {
+                    temp = temp.next;
+                }
+                temp.next = this.back;
+                this.back.prev = temp;
+            } else {
+                this.back.next = new Node<T>(item);
+                Node<T> temp = this.back;
+                this.back = this.back.next;
+                this.back.prev = temp;
+            }
+        } else {
+            if (index > this.size/2) {
+                Node<T> curr = this.back;
+                // iterate to one after index
+                for (int i = this.size; i > index; i--) {
+                    curr = curr.prev;
+                }
+                Node<T> newItem = new Node<T>(item);
+                Node<T> prevNode = curr.prev;
+                prevNode.next = newItem;
+                newItem.prev = prevNode;
+                newItem.next = curr;
+                curr.prev = newItem;
+            } else {
+                Node<T> curr = this.front;
+                for (int i = 0; i < index - 1; i++) {
+                    curr = curr.next;
+                }
+                Node<T> prevNode = curr;
+                Node<T> nextNode = curr.next;
+                prevNode.next = new Node<T>(item);
+                Node<T> newNode = prevNode.next;
+                newNode.next = nextNode;
+                nextNode.prev = newNode;
+                newNode.prev = prevNode;
+            }
         }
         this.size++;
     }
