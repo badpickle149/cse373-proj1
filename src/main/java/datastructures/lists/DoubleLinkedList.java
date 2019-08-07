@@ -166,6 +166,14 @@ public class DoubleLinkedList<T> implements IList<T> {
                 this.back = this.back.next;
                 this.back.prev = temp;
             }
+        } else if (index == this.size - 1) {
+            Node<T> curr = this.back.prev;
+            Node<T> newNode = new Node<T>(item);
+            newNode.next = this.back;
+            newNode.prev = curr;
+            curr.next = newNode;
+            this.back.prev = newNode;
+
         } else {
             if (index > this.size/2) {
                 Node<T> curr = this.back;
@@ -219,8 +227,17 @@ public class DoubleLinkedList<T> implements IList<T> {
     public int indexOf(T item) {
         Node<T> curr = this.front;
         for (int i = 0; i < this.size; i++) {
-            if (curr.data == item) {
-                return i;
+            if (item != null) {
+                if (curr.data != null) {
+                    if (curr.data.equals(item)) {
+                        return i;
+                    }
+                }
+                // else it is not null. move on to next node
+            } else { // given item is null
+                if (curr.data == null) {
+                    return i;
+                }
             }
             curr = curr.next;
         }
@@ -236,8 +253,17 @@ public class DoubleLinkedList<T> implements IList<T> {
     public boolean contains(T other) {
         Node<T> curr = this.front;
         for (int i = 0; i < this.size; i++) {
-            if (curr.data == other) {
-                return true;
+            if (other != null) {
+                if (curr.data != null) {
+                    if (curr.data.equals(other)) {
+                        return true;
+                    }
+                }
+                // else it is not equal and dont do anything
+            } else { // other is null
+                if (curr.data == null) {
+                    return true;
+                }
             }
             curr = curr.next;
         }
