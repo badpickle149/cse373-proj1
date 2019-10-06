@@ -3,6 +3,7 @@ package datastructures.dictionaries;
 import misc.exceptions.NotYetImplementedException;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * @see IDictionary
@@ -25,6 +26,9 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
 
     public ArrayDictionary() {
         this.pairs = makeArrayOfPairs(10);
+        for (int i = 0; i < 10; i++) {
+            this.pairs[i] = null;
+        }
         this.size = 0;
     }
 
@@ -50,21 +54,40 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
     }
 
     private void copyAndDoublePairs() {
-        if (this.pairs[this.size - 1].key != null) {
-            Pair<K, V>[] newPairs = makeArrayOfPairs(this.pairs.length*2);
-            for (int i = 0; i < this.pairs.length; i++) {
-                newPairs[i].key = this.pairs[i].key;
-                newPairs[i].value = this.pairs[i].value;
+        if (this.size > 0) {
+            if (this.pairs[this.pairs.length - 1] != null) {
+                // if the last element in the array has a key that's not null double the capacity
+                if (this.pairs[this.pairs.length - 1].key != null) {
+                    Pair<K, V>[] newPairs = makeArrayOfPairs(this.pairs.length*2);
+                    for (int i = 0; i < newPairs.length; i++) {
+                        if (i < this.size) {
+                            newPairs[i] = new Pair<K,V>(this.pairs[i].key, this.pairs[i].value);
+                        } else {
+                            newPairs[i] = null;
+                        }
+                    }
+                    this.pairs = newPairs;
+                }
             }
-            this.pairs = newPairs;
         }
+
     }
 
     @Override
     public V get(K key) {
-        for (int i = 0; i < this.size; i++) {
-            if (this.pairs[i].key == key) {
-                return this.pairs[i].value;
+        if (key != null) {
+            for (int i = 0; i < this.size; i++) {
+                if (this.pairs[i].key != null) {
+                    if (this.pairs[i].key.equals(key)) {
+                        return this.pairs[i].value;
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < this.size; i++) {
+                if (this.pairs[i].key == null) {
+                    return this.pairs[i].value;
+                }
             }
         }
         throw new NoSuchKeyException();
@@ -74,55 +97,88 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
     public V put(K key, V value) {
         copyAndDoublePairs();
 
-        this.size++;
         if (containsKey(key)) {
             for (int i = 0; i < this.size; i++) {
                 Pair<K, V> curr = this.pairs[i];
-                if (curr.key == key) {
-                    V oldValue = curr.value;
-                    curr.value = value;
-                    return oldValue;
+                if (key != null) {
+                    if (curr.key.equals(key)) {
+                        V oldValue = curr.value;
+                        curr.value = value;
+                        return oldValue;
+                    }
+                } else {
+                    if (curr.key == null) {
+                        V oldValue = curr.value;
+                        curr.value = value;
+                        return oldValue;
+                    }
                 }
-            }
-        }
 
-        for (int i = 0; i < this.size; i++) {
-            Pair<K,V> curr = this.pairs[i];
-            if (curr.key == null) {
-                curr.key = key;
-                curr.value = value;
-                return null;
             }
+        } else {
+            this.pairs[this.size] = new Pair<K,V>(key, value);
         }
-
-        this.pairs[size].key = key;
-        this.pairs[size].value = value;
+        this.size++;
         return null;
     }
 
     @Override
     public V remove(K key) {
         if (containsKey(key)) {
-            for (int i = 0; i < this.size; i++) {
-                Pair<K,V> curr = this.pairs[i];
-                if (curr.key == key) {
-                    V oldValue = curr.value;
-                    curr.key = null;
-                    curr.value = null;
-                    this.size--;
-                    return oldValue;
+            // lookup value to be removed
+            // replace that value with the last element in the dict array
+            if (key != null) {
+                for (int i = 0; i < this.size; i++) {
+                    Pair<K,V> curr = this.pairs[i];
+                    if (curr.key != null) {
+                        if (curr.key.equals(key)) {
+                            return switchLast(i);
+                        }
+                    }
+                }
+            } else {
+                for (int i = 0; i < this.size; i++) {
+                    Pair<K,V> curr = this.pairs[i];
+                    if (curr.key == null) {
+                        return switchLast(i);
+                    }
                 }
             }
         }
         return null;
     }
 
+    // i -> index to be overridden
+    private V switchLast(int i) {
+        Pair<K,V> curr = this.pairs[i];
+        V oldValue = curr.value;
+        Pair<K,V> lastPair = this.pairs[this.size - 1];
+        this.pairs[i].key = lastPair.key;
+        this.pairs[i].value = lastPair.value;
+        lastPair = null;
+        this.size--;
+        return oldValue;
+    }
+
     @Override
     public boolean containsKey(K key) {
-        for (int i = 0; i < this.size; i++) {
-            Pair<K,V> curr = this.pairs[i];
-            if (curr.key == key) {
-                return true;
+        if (key != null) {
+            for (int i = 0; i < this.size; i++) {
+                Pair<K,V> curr = this.pairs[i];
+                if (curr.key != null) {
+                    if (curr.key.equals(key)) {
+                        return true;
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < this.size; i++) {
+                Pair<K,V> curr = this.pairs[i];
+                if (curr.key == null) {
+                    if (curr.value != null) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -134,8 +190,9 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Iterator<KVPair<K, V>> iterator() {
-        KVPair<K,V>[] pairs = new KVPair[this.pairs.length];
+        KVPair<K,V>[] pairs = new KVPair[this.size];
         for (int i = 0; i < pairs.length; i++) {
             pairs[i] = new KVPair<K,V>(this.pairs[i].key, this.pairs[i].value);
         }
@@ -192,6 +249,10 @@ public class ArrayDictionary<K, V> implements IDictionary<K, V> {
 
         @Override
         public KVPair<K, V> next() {
+            if (currIndex >= pairs.length) {
+                throw new NoSuchElementException();
+            }
+
             KVPair<K,V> next = this.pairs[currIndex];
             this.currIndex++;
             return next;

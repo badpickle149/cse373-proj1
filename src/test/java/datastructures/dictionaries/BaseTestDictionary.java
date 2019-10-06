@@ -372,7 +372,7 @@ abstract class BaseTestDictionary extends BaseTest {
     void testIterator() {
         IDictionary<String, Integer> dict = this.newDictionary();
         IDictionary<String, Integer> copy = this.newDictionary();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 11; i++) {
             dict.put("" + i, i);
             copy.put("" + i, i);
         }
